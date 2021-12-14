@@ -78,9 +78,9 @@ workflows:
       - build
       - create_upload_docker:
           requires: [build]
-      - kubernetes_cluster
-          requires: [push_docker_image]
-      - deploy
+      # - kubernetes_cluster
+      #     requires: [push_docker_image]
+      # - deploy
       
       
   

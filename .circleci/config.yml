@@ -69,7 +69,17 @@ jobs:
             docker tag capstone $dockerpath
             docker push $dockerpath
 
-          
+  deploy_kubernetes:
+    machine:
+      image: ubuntu-2004:202111-01
+    steps:
+      - checkout
+      - run:
+          name: install kubectl
+          command: |
+            sudo curl -o /usr/local/bin/kubectl \
+            https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+            sudo chmod +x /usr/local/bin/kubectl
             
             
 workflows:
@@ -78,7 +88,7 @@ workflows:
       - build
       - create_upload_docker:
           requires: [build]
-      # - kubernetes_cluster
+      - deploy_kubernetes
       #     requires: [push_docker_image]
       # - deploy
       

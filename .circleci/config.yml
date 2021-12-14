@@ -40,6 +40,7 @@ jobs:
         
   test_build:
     steps:
+      - checkout
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "require.txt" }}
@@ -56,6 +57,7 @@ jobs:
       
   lint:
     steps:
+      - checkout
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "require.txt" }}
@@ -69,6 +71,7 @@ jobs:
             
   push_docker_image:
     steps:
+      - checkout
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "require.txt" }}

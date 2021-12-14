@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build_docker:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
@@ -38,15 +38,55 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "require.txt" }}
         
-      # run tests!
+  test_build:
+    steps:
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "require.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+    # run tests!
       - run:
           name: run tests
           command: |
             . venv/bin/activate
             make test
       # run lints!
+      
+  lint:
+    steps:
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "require.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-  
       - run:
           name: run lint
           command: |
             . venv/bin/activate
             make lint
+            
+  push_docker_image:
+    steps:
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "require.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+          
+            
+            
+workflows:
+  default:
+    jobs:
+      - build_docker
+      - test_build
+          requires: [build_docker]
+      - lint
+          requires: [build_docker]
+      - push_docker_image
+          requires: [build_docker, test_build, lint]
+      - kubernetes_cluster
+          requires: [push_docker_image]
+      - deploy

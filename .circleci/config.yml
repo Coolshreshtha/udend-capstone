@@ -82,11 +82,11 @@ jobs:
   #           sudo chmod +x /usr/local/bin/kubectl
             
             
-workflows:
-  default:
-    jobs:
-      - build
-      # - create_upload_docker:
+# workflows:
+#   default:
+#     jobs:
+#       - build
+#       # - create_upload_docker:
       #     requires: [build]
       # - deploy_kubernetes
       # #     requires: [push_docker_image]

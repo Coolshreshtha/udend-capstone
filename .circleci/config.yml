@@ -85,11 +85,14 @@ workflows:
     jobs:
       - build_docker
       - test_build
-          require: [build_docker]
+          requires: [build_docker]
       - lint
-          require: [build_docker]
+          requires: [build_docker]
       - push_docker_image
-          require: [build_docker, test_build, lint]
+          requires: [build_docker, test_build, lint]
       - kubernetes_cluster
-          require: [push_docker_image]
+          requires: [push_docker_image]
       - deploy
+      
+      
+  

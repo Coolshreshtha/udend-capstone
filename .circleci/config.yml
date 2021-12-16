@@ -69,13 +69,14 @@ jobs:
       - run:
           name: build and push docker image
           no_output_timeout: 5m
+          # # export IMAGE_TAG=capstone$(date +%s)
           command: |
             echo "initiating docker build"
-            IMAGE_TAG=capstone$(date +%s)
-            docker build --tag=${IMAGE_TAG} .
+           
+            docker build --tag=capstone .
             echo "Image build successful"
             docker image ls
-            dockerpath=bchanak/path
+            dockerpath=bchanak/capstone
             docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
             echo "login to docker hub successful"
             docker tag ${IMAGE_TAG} $dockerpath
@@ -89,11 +90,25 @@ jobs:
             # docker tag capstone $dockerpath
             # docker push $dockerpath
 
-  # deploy_kubernetes:
-  #   machine:
-  #     image: ubuntu-2004:202111-01
-  #   steps:
-  #     - checkout
+  deploy_kubernetes:
+    machine:
+      image: ubuntu-2004:202111-01
+    steps:
+      - checkout
+      - run:
+          name: install kubectl
+          command: |
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            sudo mv -v /tmp/eksctl /usr/local/bin
+            eksctl version
+          
+      - run: 
+          name: deploy cluster based on template
+          command: |
+            kubectl apply -f deploy.yaml
+            kubectl apply -f service.yaml
+            kubectl get deployment ${IMAGE_TAG}
+  
   #     - run:
   #         name: install kubectl
   #         command: |
@@ -107,9 +122,9 @@ workflows:
     jobs:
       - build
       - create_upload_docker
-      #     requires: [build]
-      # - deploy_kubernetes
-      # #     requires: [push_docker_image]
+          requires: [build]
+      - deploy_kubernetes
+          requires: [push_docker_image]
       # # - deploy
       
       

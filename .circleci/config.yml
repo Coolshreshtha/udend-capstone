@@ -169,9 +169,9 @@ jobs:
       - run:
           name: Install aws-cli
           command: |
-            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
-
-
+            sudo apt-get install awscli
+            aws --version
+           
       - run:
           name: create and test cluster
           command: |

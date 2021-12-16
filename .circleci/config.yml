@@ -121,10 +121,10 @@ workflows:
   default:
     jobs:
       - build
-      - create_upload_docker
+      - create_upload_docker:
           requires:
             - build
-      - deploy_kubernetes
+      - deploy_kubernetes:
           requires: 
             - create_upload_docker
       # # - deploy

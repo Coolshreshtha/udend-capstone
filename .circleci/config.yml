@@ -166,12 +166,16 @@ jobs:
 
             sudo mv -v /tmp/eksctl /usr/local/bin
             eksctl version
+      - run:
+          name: Install aws-cli
+          command: |
+            apk add --update py3-pip && pip3 install --upgrade pip && pip3 install awscli
 
 
       - run:
           name: create and test cluster
           command: |
-            aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" || eksctl create cluster -f cluster.yaml
+            aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" || eksctl create cluster -f cluster.yml
             kubectl get nodes
       - run:
           name: install curl

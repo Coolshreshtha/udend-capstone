@@ -177,6 +177,7 @@ jobs:
               return 0
             else
               eksctl create cluster -f cluster.yml 
+            fi
             kubectl get nodes
       - run:
           name: install curl

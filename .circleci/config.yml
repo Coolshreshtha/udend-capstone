@@ -70,8 +70,11 @@ jobs:
           name: build and push docker image
           no_output_timeout: 5m
           command: |
-            IMAGE_TAG= capstone$(date +%s)
+            echo "initiating docker build"
+            IMAGE_TAG = capstone$(date +%s)
             docker build --tag=IMAGE_TAG .
+            echo "Image build successful"
+            docker image ls
             dockerpath=bchanak/path
             docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
             docker tag IMAGE_TAG $dockerpath

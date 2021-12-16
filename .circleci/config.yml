@@ -1,179 +1,219 @@
-version: 2.1 #version 2 threw error with Unsupported or missing workflows config version
+# version: 2.1 #version 2 threw error with Unsupported or missing workflows config version
 
-orbs: 
-  aws-eks: circleci/aws-eks@1.1.0
-  kubernetes: circleci/kubernetes@0.4.0
+# orbs: 
+#   aws-eks: circleci/aws-eks@1.1.0
+#   kubernetes: circleci/kubernetes@0.4.0
 
-jobs:
-  build:
-    docker:
-      - image: circleci/python:3.6.7-stretch
+# jobs:
+#   build:
+#     docker:
+#       - image: circleci/python:3.6.7-stretch
   
-    working_directory: ~/repo
+#     working_directory: ~/repo
 
-    steps:
-      - checkout
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "require.txt" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+#     steps:
+#       - checkout
+#       # Download and cache dependencies
+#       - restore_cache:
+#           keys:
+#           - v1-dependencies-{{ checksum "require.txt" }}
+#           # fallback to using the latest cache if no exact match is found
+#           - v1-dependencies-
 
-      - run:
-          name: install dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            make install
-            # Install hadolint
-            sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
-            sudo chmod +x /bin/hadolint
+#       - run:
+#           name: install dependencies
+#           command: |
+#             python3 -m venv venv
+#             . venv/bin/activate
+#             make install
+#             # Install hadolint
+#             sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
+#             sudo chmod +x /bin/hadolint
       
-      - run:
-          name: run lint
-          command: |
-            . venv/bin/activate
-            make lint
+#       - run:
+#           name: run lint
+#           command: |
+#             . venv/bin/activate
+#             make lint
       
-      # run tests!
-      - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            make test
+#       # run tests!
+#       - run:
+#           name: run tests
+#           command: |
+#             . venv/bin/activate
+#             make test
              
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "require.txt" }}
+#       - save_cache:
+#           paths:
+#             - ./venv
+#           key: v1-dependencies-{{ checksum "require.txt" }}
             
-  create_upload_docker:
-    docker:
-     - image: docker:17.05.0-ce-git
-    working_directory: /app
-    steps:
-      - checkout
-      - setup_remote_docker
-      #reference: https://github.com/builtinnya/circleci-2.0-beta-docker-example/blob/master/.circleci/config.yml
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --no-cache \
-              py-pip=9.0.0-r1
-            pip install \
-              docker-compose==1.12.0 \
-              awscli==1.11.76
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "require.txt" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-          #            # docker image ls
-            # # docker run -d -p 8000:80 capstone
-      - run:
-          name: build and push docker image
-          no_output_timeout: 5m
-          # # export IMAGE_TAG=capstone$(date +%s)
-          command: |
-            echo "initiating docker build"
+#   create_upload_docker:
+#     docker:
+#     - image: docker:17.05.0-ce-git
+#     working_directory: /app
+#     steps:
+#       - checkout
+#       - setup_remote_docker
+#       #reference: https://github.com/builtinnya/circleci-2.0-beta-docker-example/blob/master/.circleci/config.yml
+#       - run:
+#           name: Install dependencies
+#           command: |
+#             apk add --no-cache \
+#               py-pip=9.0.0-r1
+#             pip install \
+#               docker-compose==1.12.0 \
+#               awscli==1.11.76
+#       - restore_cache:
+#           keys:
+#           - v1-dependencies-{{ checksum "require.txt" }}
+#           # fallback to using the latest cache if no exact match is found
+#           - v1-dependencies-
+#           #            # docker image ls
+#             # # docker run -d -p 8000:80 capstone
+#       - run:
+#           name: build and push docker image
+#           no_output_timeout: 5m
+#           # # export IMAGE_TAG=capstone$(date +%s)
+#           command: |
+#             echo "initiating docker build"
            
-            docker build --tag=capstone .
-            echo "Image build successful"
-            docker image ls
-            dockerpath=bchanak/capstone
-            docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
-            echo "login to docker hub successful"
-            docker tag capstone $dockerpath:latest
-            docker push $dockerpath
-      - run:
-          name: test container
-          command: |
-            docker run -d -p 8000:80 capstone
-            export CONTAINER_ID=$(docker ps -q)
-            echo ${CONTAINER_ID}
-            curl -s localhost:8000
-            docker stop ${CONTAINER_ID}
-      # - run: 
-      #     name: upload docker to docker hub
-      #     no_output_timeout: 5m
-      #     command: |
-            # dockerpath=bchanak/path
-            # docker login --username bchanak --password-stdin $S{DOCKER_PASSWORD}
-            # docker tag capstone $dockerpath
-            # docker push $dockerpath
+#             docker build --tag=capstone .
+#             echo "Image build successful"
+#             docker image ls
+#             dockerpath=bchanak/capstone
+#             docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
+#             echo "login to docker hub successful"
+#             docker tag capstone $dockerpath:latest
+#             docker push $dockerpath
+#       - run:
+#           name: install curl
+#           command: |
+#             sudo apt install curl
+#             curl --version
+#       - run:
+#           name: test container
+#           command: |
+#             docker run -d -p 8000:80 capstone
+#             export CONTAINER_ID=$(docker ps -q)
+#             echo ${CONTAINER_ID}
+#             curl -s localhost:8000
+#             docker stop ${CONTAINER_ID}
+#       # - run: 
+#       #     name: upload docker to docker hub
+#       #     no_output_timeout: 5m
+#       #     command: |
+#             # dockerpath=bchanak/path
+#             # docker login --username bchanak --password-stdin $S{DOCKER_PASSWORD}
+#             # docker tag capstone $dockerpath
+#             # docker push $dockerpath
 
-  # deploy_kubernetes:
-  #   executor: aws-eks/python3
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: install kubectl
-  #         command: |
-  #           sudo curl --silent --location -o /usr/local/bin/kubectl \
-  #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-  #           sudo chmod +x /usr/local/bin/kubectl
-  #           for command in kubectl jq envsubst aws
-  #           do
-  #             which $command &>/dev/null && echo "$command in path" || echo "$command NOT FOUND"
-  #           done
+#   # deploy_kubernetes:
+#   #   executor: aws-eks/python3
+#   #   steps:
+#   #     - checkout
+#   #     - run:
+#   #         name: install kubectl
+#   #         command: |
+#   #           sudo curl --silent --location -o /usr/local/bin/kubectl \
+#   #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+#   #           sudo chmod +x /usr/local/bin/kubectl
+#   #           for command in kubectl jq envsubst aws
+#   #           do
+#   #             which $command &>/dev/null && echo "$command in path" || echo "$command NOT FOUND"
+#   #           done
       
       
   
-      # - aws-eks/create-cluster: 
-      #     cluster-name: capstone-cluster
-      #     node-type: t3.micro
-      #     nodes-min: 1
-      #     nodes-max: 2
-          #https://medium.com/bb-tutorials-and-thoughts/aws-deploying-react-app-with-nginx-on-eks-2d3384247cda
-      # - run: 
-      #     name: deploy cluster based on template
-      #     command: |
-      #       kubectl apply -f deploy.yaml
-      #       kubectl apply -f service.yaml
-      #       kubectl get deployment ${IMAGE_TAG}
+#       # - aws-eks/create-cluster: 
+#       #     cluster-name: capstone-cluster
+#       #     node-type: t3.micro
+#       #     nodes-min: 1
+#       #     nodes-max: 2
+#           #https://medium.com/bb-tutorials-and-thoughts/aws-deploying-react-app-with-nginx-on-eks-2d3384247cda
+#       # - run: 
+#       #     name: deploy cluster based on template
+#       #     command: |
+#       #       kubectl apply -f deploy.yaml
+#       #       kubectl apply -f service.yaml
+#       #       kubectl get deployment ${IMAGE_TAG}
   
-  #     - run:
-  #         name: install kubectl
-  #         command: |
-  #           sudo curl -o /usr/local/bin/kubectl \
-  #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
-  #           sudo chmod +x /usr/local/bin/kubectl
+#   #     - run:
+#   #         name: install kubectl
+#   #         command: |
+#   #           sudo curl -o /usr/local/bin/kubectl \
+#   #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+#   #           sudo chmod +x /usr/local/bin/kubectl
             
-  create-deployment:
+#   create-deployment:
+#     executor: aws-eks/python3
+#     parameters:
+#       cluster-name:
+#         description: |
+#           capstone
+#         type: string
+#     steps:
+#       - checkout
+#       - aws-eks/update-kubeconfig-with-authenticator:
+#           cluster-name: << parameters.cluster-name >>
+#           install-kubectl: true
+#       - kubernetes/create-or-update-resource:
+#           get-rollout-status: true
+#           resource-file-path: tests/nginx-deployment/deployment.yaml
+#           resource-name: deployment/nginx-deployment
+            
+# workflows:
+#   default:
+#     jobs:
+#       - build
+#       - create_upload_docker:
+#           requires:
+#             - build
+#       # - aws-eks/create-cluster:
+#       #     cluster-name: capstone
+#       # - create-deployment:
+#       #     cluster-name: capstone
+#       #     requires:
+#       #       - aws-eks/create-cluster
+#       # - deploy_kubernetes
+#           # requires: 
+#           #   - create_upload_docker
+#       # # - deploy
+      
+      
+version: 2.1
+
+orbs:
+  aws-eks: circleci/aws-eks@1.0.0
+  kubernetes: circleci/kubernetes@0.11.1
+  
+jobs:
+  test-cluster:
     executor: aws-eks/python3
     parameters:
       cluster-name:
         description: |
-          capstone
+          Name of the EKS cluster
         type: string
     steps:
-      - checkout
+      - kubernetes/install
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
-          install-kubectl: true
-      - kubernetes/create-or-update-resource:
-          get-rollout-status: true
-          resource-file-path: tests/nginx-deployment/deployment.yaml
-          resource-name: deployment/nginx-deployment
-            
+      - run:
+          command: |
+            kubectl get services
+          name: Test cluster
+
 workflows:
-  default:
+  deployment:
     jobs:
-      - build
-      - create_upload_docker:
+      - aws-eks/create-cluster:
+          cluster-name: my-first-cluster
+      - test-cluster:
+          cluster-name: my-first-cluster
           requires:
-            - build
-      # - aws-eks/create-cluster:
-      #     cluster-name: capstone
-      # - create-deployment:
-      #     cluster-name: capstone
-      #     requires:
-      #       - aws-eks/create-cluster
-      # - deploy_kubernetes
-          # requires: 
-          #   - create_upload_docker
-      # # - deploy
-      
-      
-  
+            - aws-eks/create-cluster
+      - aws-eks/delete-cluster:
+          cluster-name: my-first-cluster
+          requires:
+            - test-cluster

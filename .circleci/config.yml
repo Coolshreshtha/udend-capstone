@@ -122,7 +122,7 @@ workflows:
     jobs:
       - build
       - create_upload_docker
-        requires: [build]
+          require: [build]
       - deploy_kubernetes
           requires: [push_docker_image]
       # # - deploy

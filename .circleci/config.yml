@@ -145,7 +145,7 @@ jobs:
   #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
   #           sudo chmod +x /usr/local/bin/kubectl
             
-  deploy-kubernetes:
+  deploy_kubernetes:
     docker:
     - image: circleci/python:3.6.7-stretch
   

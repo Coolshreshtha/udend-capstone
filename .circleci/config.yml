@@ -171,7 +171,12 @@ jobs:
       - run:
           name: create and test cluster
           command: |
-            eksctl create cluster -f cluster.yml
+            export IMAGE_TAG=$(date +%s)
+            if kubectl get nodes | grep "capstone"
+            then 
+              return 0
+            else
+              eksctl create cluster -f cluster.yml 
             kubectl get nodes
       - run:
           name: install curl

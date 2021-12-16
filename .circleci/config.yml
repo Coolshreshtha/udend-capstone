@@ -171,8 +171,7 @@ jobs:
       - run:
           name: create and test cluster
           command: |
-            export IMAGE_TAG=$(date +%s)
-            if kubectl get nodes | grep "capstone"
+            if   aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" 
             then 
               return 0
             else
@@ -223,4 +222,4 @@ workflows:
           # requires: 
           #   - create_upload_docker
       # # - deploy
-      
+  

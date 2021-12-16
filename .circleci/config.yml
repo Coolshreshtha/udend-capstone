@@ -219,4 +219,4 @@ workflows:
       # # - deploy
       
 
-       aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" || eksctl create cluster -f cluster.yaml
+     

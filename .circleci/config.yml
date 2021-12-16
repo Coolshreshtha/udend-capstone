@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-     - image: circleci/python:3.6.7-stretch
+      - image: circleci/python:3.6.7-stretch
   
     working_directory: ~/repo
 
@@ -43,31 +43,46 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "require.txt" }}
             
-  # create_upload_docker:
-  #   machine:
-  #     image: ubuntu-2004:202111-01
-  #   steps:
-  #     - checkout
-      # - restore_cache:
-      #     keys:
-      #     - v1-dependencies-{{ checksum "require.txt" }}
-      #     # fallback to using the latest cache if no exact match is found
-      #     - v1-dependencies-
+  create_upload_docker:
+    docker:
+     - image: docker:17.05.0-ce-git
+    working_directory: /app
+    steps:
+      - checkout
+      - setup_remote_docker
+      #reference: https://github.com/builtinnya/circleci-2.0-beta-docker-example/blob/master/.circleci/config.yml
       - run:
-          name: build docker image
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              py-pip=9.0.0-r1
+            pip install \
+              docker-compose==1.12.0 \
+              awscli==1.11.76
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "require.txt" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+          #            # docker image ls
+            # # docker run -d -p 8000:80 capstone
+      - run:
+          name: build and push docker image
           no_output_timeout: 5m
           command: |
-            docker build --tag=capstone .
-            docker image ls
-            docker run -d -p 8000:80 capstone
-      - run: 
-          name: upload docker to docker hub
-          no_output_timeout: 5m
-          command: |
+            docker build --tag=capstone$(date +%s) .
             dockerpath=bchanak/path
-            docker login --username bchanak --password $S{DOCKER_PASSWORD}
-            docker tag capstone $dockerpath
+            docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
+            docker tag capstone$(date +%s) $dockerpath
             docker push $dockerpath
+      # - run: 
+      #     name: upload docker to docker hub
+      #     no_output_timeout: 5m
+      #     command: |
+            # dockerpath=bchanak/path
+            # docker login --username bchanak --password-stdin $S{DOCKER_PASSWORD}
+            # docker tag capstone $dockerpath
+            # docker push $dockerpath
 
   # deploy_kubernetes:
   #   machine:
@@ -82,11 +97,11 @@ jobs:
   #           sudo chmod +x /usr/local/bin/kubectl
             
             
-# workflows:
-#   default:
-#     jobs:
-#       - build
-#       - create_upload_docker
+workflows:
+  default:
+    jobs:
+      - build
+      - create_upload_docker
       #     requires: [build]
       # - deploy_kubernetes
       # #     requires: [push_docker_image]

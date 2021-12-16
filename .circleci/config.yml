@@ -152,10 +152,6 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build
-      # - create_upload_docker:
-      #     requires:
-      #       - build
       - aws-eks/create-cluster:
           cluster-name: capstone
       - create-deployment:

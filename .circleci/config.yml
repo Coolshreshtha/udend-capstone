@@ -1,4 +1,4 @@
-version: 2.1
+version: 2.1 #version 2 threw error with Unsupported or missing workflows config version
 jobs:
   build:
     docker:
@@ -70,10 +70,11 @@ jobs:
           name: build and push docker image
           no_output_timeout: 5m
           command: |
-            docker build --tag=capstone$(date +%s) .
+            IMAGE_TAG= capstone$(date +%s)
+            docker build --tag=IMAGE_TAG .
             dockerpath=bchanak/path
             docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
-            docker tag capstone$(date +%s) $dockerpath
+            docker tag IMAGE_TAG $dockerpath
             docker push $dockerpath
       # - run: 
       #     name: upload docker to docker hub

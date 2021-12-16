@@ -171,12 +171,7 @@ jobs:
       - run:
           name: create and test cluster
           command: |
-            if   aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" 
-            then 
-              return 0
-            else
-              eksctl create cluster -f cluster.yml 
-            fi
+            aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" || eksctl create cluster -f cluster.yaml
             kubectl get nodes
       - run:
           name: install curl
@@ -222,4 +217,6 @@ workflows:
           # requires: 
           #   - create_upload_docker
       # # - deploy
-  
+      
+
+       aws cloudformation list-stacks  --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" || eksctl create cluster -f cluster.yaml

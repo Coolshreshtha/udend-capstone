@@ -86,6 +86,14 @@ jobs:
             echo "login to docker hub successful"
             docker tag capstone $dockerpath:latest
             docker push $dockerpath
+      - run:
+          name: test container
+          command: |
+            docker run -d -p 8000:80 capstone
+            export CONTAINER_ID=$(docker ps -q)
+            echo ${CONTAINER_ID}
+            curl -s localhost:8000
+            docker stop ${CONTAINER_ID}
       # - run: 
       #     name: upload docker to docker hub
       #     no_output_timeout: 5m
@@ -153,12 +161,15 @@ workflows:
   default:
     jobs:
       - build
-      - aws-eks/create-cluster:
-          cluster-name: capstone
-      - create-deployment:
-          cluster-name: capstone
+      - create_upload_docker
           requires:
-            - aws-eks/create-cluster
+            - build
+      # - aws-eks/create-cluster:
+      #     cluster-name: capstone
+      # - create-deployment:
+      #     cluster-name: capstone
+      #     requires:
+      #       - aws-eks/create-cluster
       # - deploy_kubernetes
           # requires: 
           #   - create_upload_docker

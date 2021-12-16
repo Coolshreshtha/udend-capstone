@@ -71,13 +71,14 @@ jobs:
           no_output_timeout: 5m
           command: |
             echo "initiating docker build"
-            IMAGE_TAG = capstone$(date +%s)
-            docker build --tag=IMAGE_TAG .
+            IMAGE_TAG=capstone$(date +%s)
+            docker build --tag=${IMAGE_TAG} .
             echo "Image build successful"
             docker image ls
             dockerpath=bchanak/path
             docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
-            docker tag IMAGE_TAG $dockerpath
+            echo "login to docker hub successful"
+            docker tag ${IMAGE_TAG} $dockerpath
             docker push $dockerpath
       # - run: 
       #     name: upload docker to docker hub

@@ -2,6 +2,7 @@ version: 2.1 #version 2 threw error with Unsupported or missing workflows config
 
 orbs: 
   aws-eks: circleci/aws-eks@1.1.0
+  kubernetes: circleci/kubernetes@0.4.
 
 jobs:
   build:
@@ -94,31 +95,28 @@ jobs:
             # docker tag capstone $dockerpath
             # docker push $dockerpath
 
-  deploy_kubernetes:
-    executor: aws-eks/python3
-    steps:
-      - checkout
-      - run:
-          name: install eksctl
-          command: |
-            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-            sudo mv -v /tmp/eksctl /usr/local/bin
-            eksctl version
-      - run:
-          name: install kubectl
-          command: |
-            sudo curl --silent --location -o /usr/local/bin/kubectl \
-             https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-            sudo chmod +x /usr/local/bin/kubectl
-            for command in kubectl jq envsubst aws
-            do
-              which $command &>/dev/null && echo "$command in path" || echo "$command NOT FOUND"
-            done
-      - aws-eks/create-cluster: 
-          cluster-name: capstone-cluster
-          node-type: t3.micro
-          nodes-min: 1
-          nodes-max: 2
+  # deploy_kubernetes:
+  #   executor: aws-eks/python3
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: install kubectl
+  #         command: |
+  #           sudo curl --silent --location -o /usr/local/bin/kubectl \
+  #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+  #           sudo chmod +x /usr/local/bin/kubectl
+  #           for command in kubectl jq envsubst aws
+  #           do
+  #             which $command &>/dev/null && echo "$command in path" || echo "$command NOT FOUND"
+  #           done
+      
+      
+  
+      # - aws-eks/create-cluster: 
+      #     cluster-name: capstone-cluster
+      #     node-type: t3.micro
+      #     nodes-min: 1
+      #     nodes-max: 2
           #https://medium.com/bb-tutorials-and-thoughts/aws-deploying-react-app-with-nginx-on-eks-2d3384247cda
       # - run: 
       #     name: deploy cluster based on template
@@ -134,17 +132,39 @@ jobs:
   #           https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
   #           sudo chmod +x /usr/local/bin/kubectl
             
+  create-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          capstone
+        type: string
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: tests/nginx-deployment/deployment.yaml
+          resource-name: deployment/nginx-deployment
             
 workflows:
   default:
     jobs:
-      - build
-      - create_upload_docker:
+      # - build
+      # - create_upload_docker:
+      #     requires:
+      #       - build
+      - aws-eks/create-cluster:
+          cluster-name: capstone
+      - create-deployment:
+          cluster-name: eks-demo-deployment
           requires:
-            - build
-      - deploy_kubernetes:
-          requires: 
-            - create_upload_docker
+            - aws-eks/create-cluster
+      # - deploy_kubernetes
+          # requires: 
+          #   - create_upload_docker
       # # - deploy
       
       

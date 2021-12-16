@@ -79,7 +79,7 @@ jobs:
             dockerpath=bchanak/capstone
             docker login --username ${DOCKER_USERNAME} --password ${DOCKER_PASSWORD}
             echo "login to docker hub successful"
-            docker tag ${IMAGE_TAG} $dockerpath
+            docker tag capstone $dockerpath:latest
             docker push $dockerpath
       # - run: 
       #     name: upload docker to docker hub

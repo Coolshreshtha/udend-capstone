@@ -152,10 +152,11 @@ jobs:
 workflows:
   default:
     jobs:
+      - build
       - aws-eks/create-cluster:
           cluster-name: capstone
       - create-deployment:
-          cluster-name: eks-demo-deployment
+          cluster-name: capstone
           requires:
             - aws-eks/create-cluster
       # - deploy_kubernetes

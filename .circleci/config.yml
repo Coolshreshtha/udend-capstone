@@ -95,8 +95,7 @@ jobs:
             # docker push $dockerpath
 
   deploy_kubernetes:
-    machine:
-      image: ubuntu-2004:202111-01
+    executor: aws-eks/python3
     steps:
       - checkout
       - run:

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: capstone
   labels:
-    app: ${IMAGE_TAG}
+    app: capstone-app
   namespace: default
 spec:
   replicas: 1
@@ -23,7 +23,7 @@ spec:
       containers:
       - image: bchanak/capstone:latest
         imagePullPolicy: Always
-        name: capstone
+        name: capstone-container
         ports:
         - containerPort: 80
           protocol: TCP

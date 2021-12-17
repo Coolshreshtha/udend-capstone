@@ -214,7 +214,7 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build
+      - build
       - create_upload_docker:
           requires:
             - build

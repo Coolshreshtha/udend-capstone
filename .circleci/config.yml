@@ -186,7 +186,7 @@ jobs:
             sudo apt install curl
             curl --version
       - run:
-          name:
+          name: export ROLE_NAME
           command: |
             STACK_NAME=$(eksctl get nodegroup --cluster udend-capstone -o json | jq -r '.[].StackName')
             ROLE_NAME=$(aws cloudformation describe-stack-resources --stack-name $STACK_NAME | jq -r '.StackResources[] | select(.ResourceType=="AWS::IAM::Role") | .PhysicalResourceId')
@@ -195,6 +195,8 @@ jobs:
       - run:
           name: apply deployment and service
           command: |
+            aws eks update-kubeconfig --name udend-capstone --region us-east-1
+
             kubectl apply -f deployment.yml
             kubectl apply -f service.yml
             kubectl get deployment capstone

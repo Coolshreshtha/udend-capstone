@@ -196,6 +196,7 @@ jobs:
       - run:
           name: apply deployment and service
           command: |
+            docker ps -a 
             aws eks update-kubeconfig --name udend-capstone --region us-east-1
             kubectl apply -f deployment.yml
             kubectl apply -f service.yml
@@ -219,13 +220,13 @@ jobs:
 workflows:
   default:
     jobs:
-      - build
-      - create_upload_docker:
-          requires:
-            - build
-      - deploy_kubernetes:
-          requires: 
-            - create_upload_docker
+      # - build
+      # - create_upload_docker:
+      #     requires:
+      #       - build
+      - deploy_kubernetes
+          # requires: 
+          #   - create_upload_docker
       
       
 

@@ -176,7 +176,7 @@ jobs:
       - run:
           name: create and test cluster
           command: |
-            aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "eksctl-capstone-cluster" || eksctl create cluster -f cluster.yml
+            aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "eksctl-udend-capstone-cluster" || eksctl create cluster -f cluster.yml
             
       - run:
           name: install curl
@@ -186,8 +186,7 @@ jobs:
       - run:
           name:
           command: |
-            STACK_NAME=$(eksctl get nodegroup --cluster capstone -o json | jq -r '.[].StackName')
-            ROLE_NAME=$(aws cloudformation describe-stack-resources --stack-name $STACK_NAME | jq -r '.StackResources[] | select(.ResourceType=="AWS::IAM::Role") | .PhysicalResourceId')
+            STACK_NAME=$(eksctl get nodegroup --cluster udend-k-resources --stack-name $STACK_NAME | jq -r '.StackResources[] | select(.ResourceType=="AWS::IAM::Role") | .PhysicalResourceId')
             echo "export ROLE_NAME=${ROLE_NAME}" | tee -a ~/.bash_profile
 
       - run:

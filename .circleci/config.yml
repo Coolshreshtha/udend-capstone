@@ -177,7 +177,7 @@ jobs:
           name: create and test cluster
           command: |
             aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "eksctl-udend-capstone-cluster" || eksctl create cluster -f cluster.yml
-            kubectl get nodes
+            
             
       - run:
           name: install curl

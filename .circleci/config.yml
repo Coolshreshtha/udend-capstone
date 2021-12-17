@@ -173,12 +173,12 @@ jobs:
             sudo apt-get install awscli
             aws --version
            
-      - run:
-          name: create and test cluster
-          command: |
-            aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "eksctl-udend-capstone-cluster" || eksctl create cluster -f cluster.yml
-            aws eks --region us-east-1 update-kubeconfig --name bchanak
-            kubectl get nodes
+      # - run:
+      #     name: create and test cluster
+      #     command: |
+      #       aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[*].StackName" | grep "eksctl-udend-capstone-cluster" || eksctl create cluster -f cluster.yml
+      #       aws eks --region us-east-1 update-kubeconfig --name bchanak
+      #       kubectl get nodes
             
       - run:
           name: install curl
